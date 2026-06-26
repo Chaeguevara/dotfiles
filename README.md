@@ -12,6 +12,17 @@ My terminal + Neovim setup, synced across machines.
 | `.config/starship.toml` | starship prompt theme |
 | `.config/nvim/` | Neovim config (LazyVim + JS/TS LSP, Prettier, ESLint, outline) |
 
+## Guides
+
+Basic → advanced cheatsheets, with command sets for real scenarios:
+
+- **[docs/nvim.md](docs/nvim.md)** — Neovim / LazyVim: the verb+motion grammar, LSP,
+  treesitter selection, and scenarios (rename a symbol, refactor a function,
+  project-wide replace, lazygit, multi-cursor-style edits, macros, `:g`, registers).
+- **[docs/tmux.md](docs/tmux.md)** — tmux: sessions/windows/panes, copy mode, and
+  scenarios (dev session layout, detach/attach, keep jobs alive over SSH, sync panes,
+  scripted workspaces).
+
 ## Set up a new machine
 
 ```bash
