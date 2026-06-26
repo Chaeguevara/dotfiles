@@ -1,0 +1,14 @@
+[user]
+	name = heejinchae
+	email = dfso2@naver.com
+	signingkey = /Users/heejinchae/.ssh/id_ed25519.pub
+[init]
+	defaultBranch = main
+[gpg]
+	format = ssh
+[commit]
+	gpgsign = true
+[tag]
+	gpgsign = true
+[gpg "ssh"]
+	allowedSignersFile = /Users/heejinchae/.ssh/allowed_signers

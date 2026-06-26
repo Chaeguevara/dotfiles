@@ -1,0 +1,10 @@
+# Secrets / machine-local — never commit to a public repo
+.zshrc.local
+*.local
+.env
+*.secret
+
+# OS / editor cruft
+.DS_Store
+*.swp
+*~
