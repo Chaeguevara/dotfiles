@@ -26,20 +26,26 @@ Basic → advanced cheatsheets, with command sets for real scenarios:
 ## Set up a new machine
 
 ```bash
-# 1. Prerequisites (macOS)
-brew install neovim tmux fd ripgrep lazygit node starship
-brew install --cask font-jetbrains-mono-nerd-font
+# 1. Clone
+git clone https://github.com/Chaeguevara/dotfiles ~/dotfiles
 
-# 2. Clone and link
-git clone https://github.com/<you>/dotfiles ~/dotfiles
+# 2. Install every CLI tool + font from the Brewfile
+brew bundle --file ~/dotfiles/Brewfile
+
+# 3. Symlink configs into $HOME (also clones tpm)
 cd ~/dotfiles && ./install.sh
 
-# 3. Restart the shell, then open nvim once to let plugins install
+# 4. Restart the shell, then open nvim once to let plugins install
 exec zsh
-nvim   # LazyVim bootstraps all plugins on first launch
+nvim                      # LazyVim bootstraps all plugins on first launch
+# in tmux, press: prefix + I   → installs tmux-resurrect / continuum
 ```
 
 Set your terminal font to **JetBrainsMono Nerd Font** so icons render.
+
+The **`Brewfile`** captures every installed tool, so `brew bundle` reproduces the whole
+toolchain on a new machine. Refresh it after installing new tools:
+`brew bundle dump --file ~/dotfiles/Brewfile --force`.
 
 ## Secrets
 
