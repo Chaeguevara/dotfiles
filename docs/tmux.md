@@ -100,9 +100,12 @@ exit                   # drop the SSH connection — job keeps running
 # reconnect later: ssh server → tmux attach -t build
 ```
 
-**One session per project**
-`tmux new -s api`, `tmux new -s web`, … then `prefix s` to flip between them, or
-`tmux attach -t api` directly. Names keep them organized.
+**One session per project (the fast way) — `prefix f`**
+`prefix f` opens a popup fuzzy-picker (`bin/tmux-sessionizer`) over your project dirs
+(`~/Documents/Dev` + `~`). Pick a folder → it creates-or-switches to a session named
+after it, opened in that directory. Each project gets one persistent session you hop
+between instantly. Also works from nvim: `<leader>tf` (picker) or `<leader>tn` (named).
+The manual equivalent: `tmux new -s api`, then `prefix s` to flip between sessions.
 
 **Focus on one pane temporarily**
 `prefix z` zooms the current pane to fullscreen; `prefix z` again to restore the layout.

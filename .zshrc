@@ -135,6 +135,9 @@ export VISUAL='nvim'
 alias vi='nvim'
 alias vim='nvim'
 
+# Personal scripts (tmux-sessionizer, etc.)
+export PATH="$HOME/dotfiles/bin:$PATH"
+
 # Machine-local / secret settings — NOT committed (see dotfiles/.gitignore).
 # Put API keys, tokens, machine-specific paths in ~/.zshrc.local
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local

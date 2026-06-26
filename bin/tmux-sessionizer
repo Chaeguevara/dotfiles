@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Fuzzy-pick a project directory and create-or-switch to a tmux session for it.
+# Each project gets one persistent session named after its folder.
+# Usage: tmux-sessionizer [path]   (path skips the picker)
+
+# Where to look for projects — edit to taste.
+SEARCH_DIRS=("$HOME/Documents/Dev" "$HOME")
+
+if [[ $# -eq 1 ]]; then
+  selected=$1
+else
+  selected=$(find "${SEARCH_DIRS[@]}" -mindepth 1 -maxdepth 1 -type d \
+    -not -name '.*' 2>/dev/null | sort -u | fzf --prompt="project> ")
+fi
+
+[[ -z $selected ]] && exit 0
+
+# tmux session names can't contain . or : — sanitize.
+selected_name=$(basename "$selected" | tr '.:' '__')
+tmux_running=$(pgrep tmux)
+
+# Not in tmux and no server running → just start attached.
+if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
+  tmux new-session -s "$selected_name" -c "$selected"
+  exit 0
+fi
+
+# Create the session detached if it doesn't exist yet.
+if ! tmux has-session -t="$selected_name" 2>/dev/null; then
+  tmux new-session -ds "$selected_name" -c "$selected"
+fi
+
+# Attach (from outside tmux) or switch the client (from inside tmux).
+if [[ -z $TMUX ]]; then
+  tmux attach -t "$selected_name"
+else
+  tmux switch-client -t "$selected_name"
+fi
