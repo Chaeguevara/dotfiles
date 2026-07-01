@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # rtk-hook-version: 2
-# RTK Claude Code hook — rewrites commands to use rtk for token savings.
-# Requires: rtk >= 0.23.0, jq
+# RTK Claude Code hook — rewrites commands to use /Users/heejinchae/.headroom/bin/rtk for token savings.
+# Requires: /Users/heejinchae/.headroom/bin/rtk >= 0.23.0, jq
 #
-# This is a thin delegating hook: all rewrite logic lives in `rtk rewrite`,
+# This is a thin delegating hook: all rewrite logic lives in `/Users/heejinchae/.headroom/bin/rtk rewrite`,
 # which is the single source of truth (src/discover/registry.rs).
 # To add or change rewrite rules, edit the Rust registry — not this file.
 
@@ -12,20 +12,20 @@ if ! command -v jq &>/dev/null; then
   exit 0
 fi
 
-if ! command -v rtk &>/dev/null; then
-  echo "[rtk] WARNING: rtk is not installed or not in PATH. Hook cannot rewrite commands. Install: https://github.com/rtk-ai/rtk#installation" >&2
+if ! command -v /Users/heejinchae/.headroom/bin/rtk &>/dev/null; then
+  echo "[rtk] WARNING: /Users/heejinchae/.headroom/bin/rtk is not installed or not in PATH. Hook cannot rewrite commands. Install: https://github.com/rtk-ai/rtk#installation" >&2
   exit 0
 fi
 
-# Version guard: rtk rewrite was added in 0.23.0.
+# Version guard: /Users/heejinchae/.headroom/bin/rtk rewrite was added in 0.23.0.
 # Older binaries: warn once and exit cleanly (no silent failure).
-RTK_VERSION=$(rtk --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+RTK_VERSION=$(/Users/heejinchae/.headroom/bin/rtk --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
 if [ -n "$RTK_VERSION" ]; then
   MAJOR=$(echo "$RTK_VERSION" | cut -d. -f1)
   MINOR=$(echo "$RTK_VERSION" | cut -d. -f2)
   # Require >= 0.23.0
   if [ "$MAJOR" -eq 0 ] && [ "$MINOR" -lt 23 ]; then
-    echo "[rtk] WARNING: rtk $RTK_VERSION is too old (need >= 0.23.0). Upgrade: cargo install rtk" >&2
+    echo "[rtk] WARNING: /Users/heejinchae/.headroom/bin/rtk $RTK_VERSION is too old (need >= 0.23.0). Upgrade: cargo install rtk" >&2
     exit 0
   fi
 fi
@@ -38,8 +38,8 @@ if [ -z "$CMD" ]; then
 fi
 
 # Delegate all rewrite logic to the Rust binary.
-# rtk rewrite exits 1 when there's no rewrite — hook passes through silently.
-REWRITTEN=$(rtk rewrite "$CMD" 2>/dev/null) || exit 0
+# /Users/heejinchae/.headroom/bin/rtk rewrite exits 1 when there's no rewrite — hook passes through silently.
+REWRITTEN=$(/Users/heejinchae/.headroom/bin/rtk rewrite "$CMD" 2>/dev/null) || exit 0
 
 # No change — nothing to do.
 if [ "$CMD" = "$REWRITTEN" ]; then
