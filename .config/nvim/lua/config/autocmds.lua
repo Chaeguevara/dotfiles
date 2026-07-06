@@ -22,3 +22,16 @@ vim.opt.fillchars:append({ horiz = "─", vert = "│", horizup = "┴", horizdo
 
 -- Apply immediately for the current session (ColorScheme already fired at startup).
 vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#7c8088", bold = true })
+
+-- Snacks explorer: the git "untracked" (?) marker links to NonText, which is
+-- nearly invisible in most themes. Give it a readable green ("new file").
+-- Re-applied on every ColorScheme so it survives theme switches.
+vim.api.nvim_create_autocmd("ColorScheme", {
+  group = vim.api.nvim_create_augroup("snacks_git_untracked_contrast", { clear = true }),
+  callback = function()
+    vim.api.nvim_set_hl(0, "SnacksPickerGitStatusUntracked", { link = "Added" })
+  end,
+})
+
+-- Apply immediately for the current session.
+vim.api.nvim_set_hl(0, "SnacksPickerGitStatusUntracked", { link = "Added" })
