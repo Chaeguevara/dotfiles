@@ -64,6 +64,14 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
+## 5. Ontology First
+
+**When a project ships an ontology, it is the source of truth for domain terms. Leverage it — but navigate it token-cheaply.**
+
+- Before answering a domain question, check the ontology instead of guessing.
+- **Index/TOC-first, then follow links.** Read the ontology's index or root concept first, follow `[[wiki-links]]` to load only the specific concept shards you need. Never read the whole ontology into context.
+- For this to stay cheap, the ontology must stay well-organized: one concept per file, small shards, a thin index that links out. If navigation is forcing you to load large or tangled files, say so — that's a signal to restructure the ontology, not to keep dumping it into context.
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
