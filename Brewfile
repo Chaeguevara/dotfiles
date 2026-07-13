@@ -1,3 +1,5 @@
+# .NET SDK and runtime (builds the rhino-mcp Grasshopper/Rhino plugins)
+brew "dotnet"
 # Simple, fast and user-friendly alternative to find
 brew "fd"
 # Command-line fuzzy finder written in Go
