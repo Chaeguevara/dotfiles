@@ -13,6 +13,7 @@ return {
     build = "cd app && npm install",
     ft = { "markdown" },
     init = function()
+      vim.g.mkdp_auto_start = 1 -- open browser preview automatically on md open
       vim.g.mkdp_auto_close = 1 -- close preview tab when leaving the md buffer
     end,
     keys = {
