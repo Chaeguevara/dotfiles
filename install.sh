@@ -47,7 +47,10 @@ fi
 if command -v npx >/dev/null 2>&1; then
   npx -y skills add JuliusBrussee/caveman -g -y || true
   npx -y skills add mattpocock/skills --skill handoff -g -y || true
+  npx -y skills add mattpocock/skills --skill edit-article -g -y || true
   npx -y skills add https://github.com/crafter-station/skills/tree/main/context-engineering/intent-layer --skill intent-layer -g -y || true
+  npx -y skills add vercel-labs/skills --skill find-skills -g -y || true
+  npx -y skills add autodesk-platform-services/skills -g -y || true
 fi
 
 # RTK (headroom) token-saving proxy: install headroom's `rtk` binary, ensure it

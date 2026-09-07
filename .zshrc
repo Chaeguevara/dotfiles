@@ -141,3 +141,7 @@ export PATH="$HOME/dotfiles/bin:$PATH"
 # Machine-local / secret settings — NOT committed (see dotfiles/.gitignore).
 # Put API keys, tokens, machine-specific paths in ~/.zshrc.local
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
+
+
+# Added by Antigravity CLI installer
+export PATH="$HOME/.local/bin:$PATH"

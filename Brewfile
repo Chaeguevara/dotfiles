@@ -12,6 +12,8 @@ brew "lazygit"
 brew "neovim"
 # Open-source, cross-platform JavaScript runtime environment
 brew "node"
+# Search tool like grep and The Silver Searcher
+brew "ripgrep"
 # Cross-shell prompt for astronauts
 brew "starship"
 # Terminal multiplexer

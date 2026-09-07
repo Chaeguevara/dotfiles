@@ -4,9 +4,6 @@ return {
   { "lunacookies/vim-colors-xcode" },
   { "LazyVim/LazyVim", opts = { colorscheme = "xcodedark" } },
 
-  -- one buffer on screen, no bufferline tab strip
-  { "akinsho/bufferline.nvim", enabled = false },
-
   -- flat, quiet statusline (no powerline wedges)
   {
     "nvim-lualine/lualine.nvim",
