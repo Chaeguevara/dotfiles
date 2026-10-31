@@ -23,10 +23,34 @@ link .gitconfig
 link .config/starship.toml
 link .config/nvim
 
-# tmux plugin manager (needed by .tmux.conf plugins)
+# tmux plugin manager + plugins (needed by .tmux.conf)
+mkdir -p "$HOME/.tmux/plugins"
 if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
   git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
-  echo "cloned tpm — open tmux and press 'prefix + I' to install plugins"
+  echo "cloned tpm"
+fi
+[ ! -d "$HOME/.tmux/plugins/tmux-resurrect" ] && \
+  git clone https://github.com/tmux-plugins/tmux-resurrect "$HOME/.tmux/plugins/tmux-resurrect" 2>/dev/null || true
+[ ! -d "$HOME/.tmux/plugins/tmux-continuum" ] && \
+  git clone https://github.com/tmux-plugins/tmux-continuum "$HOME/.tmux/plugins/tmux-continuum" 2>/dev/null || true
+
+# --- Oh My Zsh custom plugins -----------------------------------------------
+# Ensure custom plugins used by .zshrc are installed so fresh setups don't complain
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+if [ -d "$HOME/.oh-my-zsh" ]; then
+  mkdir -p "$ZSH_CUSTOM/plugins"
+  [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ] && \
+    git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions" 2>/dev/null || true
+  [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ] && \
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" 2>/dev/null || true
+  [ ! -d "$ZSH_CUSTOM/plugins/zsh-completions" ] && \
+    git clone https://github.com/zsh-users/zsh-completions "$ZSH_CUSTOM/plugins/zsh-completions" 2>/dev/null || true
+fi
+
+# --- Machine-local config template ------------------------------------------
+if [ ! -f "$HOME/.zshrc.local" ] && [ -f "$DOT/.zshrc.local.example" ]; then
+  cp "$DOT/.zshrc.local.example" "$HOME/.zshrc.local"
+  echo "created ~/.zshrc.local from template"
 fi
 
 # --- Claude Code config -----------------------------------------------------

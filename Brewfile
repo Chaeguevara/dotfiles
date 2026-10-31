@@ -1,3 +1,5 @@
+# Load/unload environment variables based on current directory
+brew "direnv"
 # .NET SDK and runtime (builds the rhino-mcp Grasshopper/Rhino plugins)
 brew "dotnet"
 # Simple, fast and user-friendly alternative to find
@@ -18,6 +20,8 @@ brew "ripgrep"
 brew "starship"
 # Terminal multiplexer
 brew "tmux"
+# Parser generator tool (required by nvim-treesitter main branch to compile parsers)
+brew "tree-sitter-cli"
 # Terminal-based AI coding assistant
 cask "claude-code"
 cask "font-jetbrains-mono-nerd-font"

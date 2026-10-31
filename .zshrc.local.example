@@ -1,0 +1,30 @@
+# ==============================================================================
+# ~/.zshrc.local (Machine-local & Work specific settings)
+# This file is NOT tracked by git. Use this for secrets, work proxies, and
+# machine-specific overrides.
+# ==============================================================================
+
+# --- 1. Work & Network Proxy (사내망 / 프록시 설정) ---
+# export WORK_ENV="development"
+# export CORPORATE_PROXY="http://proxy.company.internal:8080"
+# export HTTP_PROXY="$CORPORATE_PROXY"
+# export HTTPS_PROXY="$CORPORATE_PROXY"
+# export ALL_PROXY="$CORPORATE_PROXY"
+# export NO_PROXY="localhost,127.0.0.1,.company.internal"
+
+# --- 2. Package Managers & Private Registries (사내 레지스트리) ---
+# export NPM_CONFIG_REGISTRY="https://npm.pkg.github.com/company"
+# export PIP_INDEX_URL="https://artifactory.company.internal/artifactory/api/pypi/pypi/simple"
+
+# --- 3. Cloud & DevOps Credentials / Profiles ---
+# export AWS_PROFILE="work-dev"
+# export KUBECONFIG="$HOME/.kube/config"
+
+# --- 4. Secrets & API Keys (개인/회사 API 토큰) ---
+# export GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"
+# export OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxx"
+# export ANTHROPIC_API_KEY="sk-ant-xxxxxxxxxxxxxxxxxxxx"
+
+# --- 5. Machine-specific PATH additions ---
+# export PATH="$HOME/.cargo/bin:$PATH"
+# export PATH="$HOME/.headroom/bin:$PATH"

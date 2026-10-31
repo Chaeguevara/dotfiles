@@ -31,6 +31,9 @@ require("lazy").setup({
     -- version = "*", -- try installing the latest stable version for plugins that support semver
   },
   install = { colorscheme = { "tokyonight", "habamax" } },
+  rocks = {
+    enabled = false, -- no plugins use luarocks; avoids hererocks Lua 5.1 C build issues across macOS SDKs
+  },
   checker = {
     enabled = true, -- check for plugin updates periodically
     notify = false, -- notify on update

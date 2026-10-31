@@ -49,10 +49,12 @@ The **`Brewfile`** captures every installed tool, so `brew bundle` reproduces th
 toolchain on a new machine. Refresh it after installing new tools:
 `brew bundle dump --file ~/dotfiles/Brewfile --force`.
 
-## Secrets
+## Secrets & Local Overrides
 
-Machine-local secrets (API keys, tokens) go in `~/.zshrc.local`, which is
-gitignored and sourced automatically by `.zshrc`. Nothing secret is committed.
+Machine-local secrets (API keys, tokens, work proxies) go in `~/.zshrc.local`, which is
+gitignored and sourced automatically by `.zshrc`. A starter template is provided in
+`.zshrc.local.example` and copied to `~/.zshrc.local` on first run by `./install.sh`.
+For per-directory/project isolation, `direnv` is supported via `.envrc`.
 
 ## How sync works
 

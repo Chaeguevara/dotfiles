@@ -143,7 +143,8 @@ tmux attach -t app
 bind it. `prefix s` is the visual version.
 
 **Persist sessions across reboots** — already wired via `tmux-resurrect` + `tmux-continuum`
-(tpm). Sessions auto-save every 15 min and restore when the tmux server starts. Manual
+(tpm). Sessions auto-save every 15 min, while automatic restore on server start is disabled
+(`@continuum-restore 'off'`) so new sessions aren't hijacked by old snapshots. Manual
 save/restore: `prefix Ctrl-s` / `prefix Ctrl-r`. After cloning on a new machine, press
 `prefix + I` once to install the plugins.
 

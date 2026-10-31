@@ -1,5 +1,21 @@
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
+# Homebrew environment initialization (Apple Silicon / Intel)
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -f "/usr/local/bin/brew" ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+# macOS SDK compatibility: align deployment target with the running macOS version
+# so native builds (e.g. nvim-treesitter parsers compiled via tree-sitter/clang)
+# don't embed a newer Xcode/CommandLineTools SDK version as minos and fail dlopen.
+if [[ "$OSTYPE" == darwin* ]]; then
+  if [[ -z "${MACOSX_DEPLOYMENT_TARGET:-}" ]]; then
+    export MACOSX_DEPLOYMENT_TARGET="$(sw_vers -productVersion)"
+  fi
+  if ! xcrun --show-sdk-path >/dev/null 2>&1 && [[ -d "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk" ]]; then
+    export SDKROOT="/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
+  fi
+fi
 
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -137,6 +153,9 @@ alias vim='nvim'
 
 # Personal scripts (tmux-sessionizer, etc.)
 export PATH="$HOME/dotfiles/bin:$PATH"
+
+# direnv: per-directory environment variables (.envrc)
+command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
 
 # Machine-local / secret settings — NOT committed (see dotfiles/.gitignore).
 # Put API keys, tokens, machine-specific paths in ~/.zshrc.local
