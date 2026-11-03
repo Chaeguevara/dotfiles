@@ -1,38 +1,155 @@
 #!/usr/bin/env bash
-# Fuzzy-pick a project directory and create-or-switch to a tmux session for it.
-# Each project gets one persistent session named after its folder.
-# Usage: tmux-sessionizer [path]   (path skips the picker)
+# Create, attach, or restore a folder-scoped tmux session.
+# Always scopes to the exact target folder (even if inside a parent git repo).
+# Usage: tmux-sessionizer [path]   (path skips the fzf picker)
 
-# Where to look for projects — edit to taste.
+# Where to look for projects when no path is given — edit to taste.
 SEARCH_DIRS=("$HOME/Documents/Dev" "$HOME")
 
-if [[ $# -eq 1 ]]; then
-  selected=$1
+if [[ $# -ge 1 ]]; then
+  selected="$1"
 else
   selected=$(find "${SEARCH_DIRS[@]}" -mindepth 1 -maxdepth 1 -type d \
     -not -name '.*' 2>/dev/null | sort -u | fzf --prompt="project> ")
 fi
 
-[[ -z $selected ]] && exit 0
+[[ -z "${selected:-}" ]] && exit 0
 
-# tmux session names can't contain . or : — sanitize.
-selected_name=$(basename "$selected" | tr '.:' '__')
-tmux_running=$(pgrep tmux)
-
-# Not in tmux and no server running → just start attached.
-if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
-  tmux new-session -s "$selected_name" -c "$selected"
-  exit 0
+# Normalize to an exact physical/logical folder path (do NOT resolve to git root).
+if ! selected=$(cd "$selected" 2>/dev/null && pwd); then
+  exit 1
 fi
 
-# Create the session detached if it doesn't exist yet.
-if ! tmux has-session -t="$selected_name" 2>/dev/null; then
-  tmux new-session -ds "$selected_name" -c "$selected"
+sanitize_name() {
+  echo "$1" | tr '.: ' '___'
+}
+
+base_name=$(sanitize_name "$(basename "$selected")")
+[[ -z "$base_name" ]] && base_name="root"
+selected_name="$base_name"
+
+# If a live session has the same basename but belongs to a different folder path,
+# disambiguate with `<parent>_<folder>`.
+if tmux has-session -t "=$selected_name" 2>/dev/null; then
+  existing_path=$(tmux show-options -t "=$selected_name" -qv @session_path 2>/dev/null)
+  if [[ -z "$existing_path" ]]; then
+    existing_path=$(tmux list-panes -t "=$selected_name" -F "#{pane_current_path}" 2>/dev/null | head -n 1)
+  fi
+  if [[ -n "$existing_path" && "$existing_path" != "$selected" ]]; then
+    parent_name=$(sanitize_name "$(basename "$(dirname "$selected")")")
+    selected_name="${parent_name}_${base_name}"
+  fi
 fi
+
+# Restore a single folder's session from the most recent matching tmux-resurrect snapshot.
+restore_session_from_resurrect() {
+  local target_session="$1"
+  local target_dir="$2"
+  local resurrect_dir="${HOME}/.tmux/resurrect"
+  [[ ! -d "$resurrect_dir" ]] && resurrect_dir="${XDG_DATA_HOME:-$HOME/.local/share}/tmux/resurrect"
+  [[ ! -d "$resurrect_dir" ]] && return 1
+
+  local file src_session=""
+  while IFS= read -r file; do
+    [[ -f "$file" ]] || continue
+    src_session=$(awk -F'\t' -v s="$target_session" -v d=":$target_dir" '
+      $1 == "pane" {
+        dir = $8
+        gsub(/\\ /, " ", dir)
+        if ($2 == s && (dir == d || index(dir, d "/") == 1)) {
+          found = $2
+          exit
+        }
+        if ($2 ~ /^[0-9]+$/ && !seen[$2]++) {
+          if (dir == d) {
+            legacy = $2
+          }
+        }
+      }
+      END {
+        if (found != "") print found
+        else if (legacy != "") print legacy
+      }
+    ' "$file")
+    [[ -n "$src_session" ]] && break
+  done < <(ls -t "$resurrect_dir"/tmux_resurrect_*.txt 2>/dev/null)
+
+  [[ -z "$src_session" ]] && return 1
+
+  local d=$'\t'
+  local line_type s_name win_num win_active win_flags pane_idx pane_title raw_dir pane_active pane_cmd raw_full_cmd
+  while IFS=$d read -r line_type s_name win_num win_active win_flags pane_idx pane_title raw_dir pane_active pane_cmd raw_full_cmd; do
+    [[ "$line_type" == "pane" && "$s_name" == "$src_session" ]] || continue
+    local dir="${raw_dir#:}"
+    dir="${dir//\\ / }"
+    dir="${dir/#\~/$HOME}"
+    [[ -d "$dir" ]] || dir="$target_dir"
+
+    if ! tmux has-session -t "=$target_session" 2>/dev/null; then
+      TMUX="" tmux new-session -d -s "$target_session" -c "$dir"
+      tmux set-option -t "=$target_session" -q @session_path "$target_dir"
+      local created_win
+      created_win=$(tmux list-windows -t "=$target_session" -F "#{window_index}" | head -n 1)
+      if [[ -n "$created_win" && "$created_win" != "$win_num" ]]; then
+        tmux move-window -s "=${target_session}:${created_win}" -t "=${target_session}:${win_num}"
+      fi
+    elif ! tmux list-windows -t "=$target_session" -F "#{window_index}" 2>/dev/null | grep -qx "$win_num"; then
+      tmux new-window -d -t "=${target_session}:${win_num}" -c "$dir"
+    else
+      tmux split-window -d -t "=${target_session}:${win_num}" -c "$dir"
+      tmux resize-pane -t "=${target_session}:${win_num}" -U 999 2>/dev/null || true
+    fi
+    tmux select-pane -t "=${target_session}:${win_num}.${pane_idx}" -T "$pane_title" 2>/dev/null || true
+  done < "$file"
+
+  tmux has-session -t "=$target_session" 2>/dev/null || return 1
+
+  local raw_win_name win_layout auto_rename
+  while IFS=$d read -r line_type s_name win_num raw_win_name win_active win_flags win_layout auto_rename; do
+    [[ "$line_type" == "window" && "$s_name" == "$src_session" ]] || continue
+    tmux select-layout -t "=${target_session}:${win_num}" "$win_layout" 2>/dev/null || true
+    tmux rename-window -t "=${target_session}:${win_num}" "${raw_win_name#:}" 2>/dev/null || true
+    if [[ "$auto_rename" == ":" || -z "$auto_rename" ]]; then
+      tmux set-window-option -u -t "=${target_session}:${win_num}" automatic-rename 2>/dev/null || true
+    else
+      tmux set-window-option -t "=${target_session}:${win_num}" automatic-rename "$auto_rename" 2>/dev/null || true
+    fi
+  done < "$file"
+
+  while IFS=$d read -r line_type s_name win_num win_active win_flags pane_idx pane_title raw_dir pane_active pane_cmd raw_full_cmd; do
+    [[ "$line_type" == "pane" && "$s_name" == "$src_session" ]] || continue
+    local full_cmd="${raw_full_cmd#:}"
+    if [[ "$full_cmd" =~ ^(nvim|vim|vi|man|less|tail|top|htop)( |$) ]]; then
+      tmux send-keys -t "=${target_session}:${win_num}.${pane_idx}" "$full_cmd" C-m 2>/dev/null || true
+    fi
+    if [[ "$pane_active" == "1" ]]; then
+      tmux select-pane -t "=${target_session}:${win_num}.${pane_idx}" 2>/dev/null || true
+      if [[ "$win_flags" == *Z* ]]; then
+        tmux resize-pane -t "=${target_session}:${win_num}.${pane_idx}" -Z 2>/dev/null || true
+      fi
+    fi
+  done < "$file"
+
+  while IFS=$d read -r line_type s_name win_num raw_win_name win_active win_flags win_layout auto_rename; do
+    [[ "$line_type" == "window" && "$s_name" == "$src_session" && "$win_active" == "1" ]] || continue
+    tmux select-window -t "=${target_session}:${win_num}" 2>/dev/null || true
+  done < "$file"
+
+  return 0
+}
+
+# Create or restore the session detached if it doesn't exist in the running server yet.
+if ! tmux has-session -t "=$selected_name" 2>/dev/null; then
+  if ! restore_session_from_resurrect "$selected_name" "$selected"; then
+    TMUX="" tmux new-session -ds "$selected_name" -c "$selected"
+  fi
+fi
+
+tmux set-option -t "=$selected_name" -q @session_path "$selected" 2>/dev/null || true
 
 # Attach (from outside tmux) or switch the client (from inside tmux).
-if [[ -z $TMUX ]]; then
-  tmux attach -t "$selected_name"
+if [[ -z "${TMUX:-}" ]]; then
+  tmux attach -t "=$selected_name"
 else
-  tmux switch-client -t "$selected_name"
+  tmux switch-client -t "=$selected_name"
 fi

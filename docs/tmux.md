@@ -21,7 +21,7 @@ tab inside it. A **pane** is a split region of a window.
 
 | Command | Action |
 |---|---|
-| `tmux` | start a new unnamed session |
+| `tmux` | attach/restore or create a session for the current folder (`$PWD`) |
 | `tmux new -s dev` | start a session named `dev` |
 | `tmux ls` | list sessions |
 | `tmux attach -t dev` | re-attach to `dev` |
@@ -100,12 +100,13 @@ exit                   # drop the SSH connection — job keeps running
 # reconnect later: ssh server → tmux attach -t build
 ```
 
-**One session per project (the fast way) — `prefix f`**
-`prefix f` opens a popup fuzzy-picker (`bin/tmux-sessionizer`) over your project dirs
-(`~/Documents/Dev` + `~`). Pick a folder → it creates-or-switches to a session named
-after it, opened in that directory. Each project gets one persistent session you hop
-between instantly. Also works from nvim: `<leader>tf` (picker) or `<leader>tn` (named).
-The manual equivalent: `tmux new -s api`, then `prefix s` to flip between sessions.
+**One session per folder (the fast way) — `tmux` or `prefix f`**
+Running bare `tmux` in any directory uses `bin/tmux-sessionizer "$PWD"` to attach to
+the existing session for that exact folder (even if inside a parent git repo), restore
+that folder's saved `tmux-resurrect` session if the server restarted, or create a new
+session named after the folder. `prefix f` opens a popup fuzzy-picker (`bin/tmux-sessionizer`)
+over your project dirs (`~/Documents/Dev` + `~`). Also works from nvim: `<leader>tf`
+(picker) or `<leader>tn` (named).
 
 **Focus on one pane temporarily**
 `prefix z` zooms the current pane to fullscreen; `prefix z` again to restore the layout.
@@ -143,10 +144,11 @@ tmux attach -t app
 bind it. `prefix s` is the visual version.
 
 **Persist sessions across reboots** — already wired via `tmux-resurrect` + `tmux-continuum`
-(tpm). Sessions auto-save every 15 min, while automatic restore on server start is disabled
-(`@continuum-restore 'off'`) so new sessions aren't hijacked by old snapshots. Manual
-save/restore: `prefix Ctrl-s` / `prefix Ctrl-r`. After cloning on a new machine, press
-`prefix + I` once to install the plugins.
+(tpm). Sessions auto-save every 15 min and on detach (`client-detached` hook). Global
+auto-restore on server start is disabled (`@continuum-restore 'off'`); instead, running
+`tmux` in a folder restores only that folder's saved session from `tmux-resurrect` if one
+exists. Manual save/restore: `prefix Ctrl-s` / `prefix Ctrl-r`. After cloning on a new
+machine, press `prefix + I` once to install the plugins.
 
 ---
 

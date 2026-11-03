@@ -154,6 +154,16 @@ alias vim='nvim'
 # Personal scripts (tmux-sessionizer, etc.)
 export PATH="$HOME/dotfiles/bin:$PATH"
 
+# Folder-scoped tmux: running `tmux` with no arguments attaches/restores the session
+# for the exact current folder ($PWD, ignoring any parent git root) or creates a new one.
+tmux() {
+  if [[ $# -eq 0 ]]; then
+    "$HOME/dotfiles/bin/tmux-sessionizer" "$PWD"
+  else
+    command tmux "$@"
+  fi
+}
+
 # direnv: per-directory environment variables (.envrc)
 command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
 
